@@ -10,14 +10,8 @@ async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
     let triggerLog = { 
         datetime: datetime.toISOString(),
         since: datetime.valueOf(),
-        invokedAPI: '/api/cron',
-        headers: {},
         responses: [] as ISimplifiedResponse[]
     };
-
-    for (const k in req.headers) {
-        triggerLog.headers[k] = req.headers[k];
-    }
 
     let resultsPromise = targets.map(async (target) => {
         const timeStart = new Date().valueOf();

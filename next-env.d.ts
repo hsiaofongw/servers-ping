@@ -14,8 +14,6 @@ interface ISimplifiedResponse {
 interface ITriggerLog {
     datetime: string;
     since: number;
-    invokedAPI: string;
-    headers?: ISimplifiedHeaders;
     responses: ISimplifiedResponse[];
 }
 
