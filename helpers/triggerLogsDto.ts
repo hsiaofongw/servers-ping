@@ -35,3 +35,8 @@ export async function saveTriggerLog(triggerLog: ITriggerLog) {
     }
 
 }
+
+async function getTriggerLogs(since: number) {
+    const sinceDate = new Date(since);
+
+}

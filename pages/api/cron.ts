@@ -5,8 +5,11 @@ import { saveTriggerLog } from '../../helpers/triggerLogsDto';
 
 async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
 
+    const datetime = new Date();
+
     let triggerLog = { 
-        datetime: new Date().toISOString(),
+        datetime: datetime.toISOString(),
+        since: datetime.valueOf(),
         invokedAPI: '/api/cron',
         headers: {},
         responses: [] as ISimplifiedResponse[]
@@ -17,14 +20,20 @@ async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     let resultsPromise = targets.map(async (target) => {
+        const timeStart = new Date().valueOf();
         const { headers, statusCode } = await got(target.url);
+        const timeReceive = new Date().valueOf();
+        const roundtrip = timeReceive - timeStart;
 
         let response = {
             datetime: new Date().toISOString(),
             'siteName': target.siteName,
             'url': target.url,
             'statusCode': statusCode,
-            'headers': {}
+            'headers': {},
+            timeStart,
+            timeReceive,
+            roundtrip
         };
 
         console.log(response);
