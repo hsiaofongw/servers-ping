@@ -3,6 +3,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
 
     let logObject = { 
+        datetime: new Date().toISOString(),
+        invokedAPI: '/api/cron',
+        'req.url': req.url || "unknow",
+        'req.query': req.query || "empty",
         headers: {
             host: '',
             authorization: '',
