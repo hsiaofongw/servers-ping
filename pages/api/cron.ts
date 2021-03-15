@@ -1,37 +1,48 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import targets from '../../data/watchList.json';
+import got from 'got';
+import { saveTriggerLog } from '../../helpers/triggerLogsDto';
 
 async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
 
-    let logObject = { 
+    let triggerLog = { 
         datetime: new Date().toISOString(),
         invokedAPI: '/api/cron',
-        'req.url': req.url || "unknow",
-        'req.query': req.query || "empty",
-        headers: {
-            host: '',
-            authorization: '',
-            'x-matched-path': '',
-            'x-forwarded-host': '',
-            accept: '',
-            'x-vercel-deployment-url': '',
-            'x-forwarded-proto': '',
-            'x-forwarded-for': '',
-            'user-agent': '',
-            'x-vercel-forwarded-for': '',
-            'x-real-ip': '',
-            'x-vercel-id': '',
-            connection: '',
-            'transfer-encoding': ''
-        }
+        headers: {},
+        responses: [] as ISimplifiedResponse[]
     };
 
     for (const k in req.headers) {
-        logObject.headers[k] = req.headers[k];
+        triggerLog.headers[k] = req.headers[k];
     }
 
-    console.log(logObject);
-    res.status(200).json(logObject);
-}
+    let resultsPromise = targets.map(async (target) => {
+        const { headers, statusCode } = await got(target.url);
 
+        let response = {
+            datetime: new Date().toISOString(),
+            'siteName': target.siteName,
+            'url': target.url,
+            'statusCode': statusCode,
+            'headers': {}
+        };
+
+        console.log(response);
+        
+        response['headers'] = headers;
+
+        triggerLog.responses.push(response);
+    });
+
+    Promise.allSettled(resultsPromise)
+    .then(async (values) => {
+        return await saveTriggerLog(triggerLog);
+    })
+    .then(values => {
+        res.status(200).json(triggerLog);
+    }).finally(() => {
+        res.end();
+    });
+}
 
 export default requestHandler;
