@@ -9,25 +9,26 @@ uri = uri.replace("<username>", username);
 uri = uri.replace("<password>", password);
 uri = uri.replace("<cluster-url>", cluster);
 
-console.log({
-    username, password, cluster, uri
-});
-
 const client = new MongoClient(uri);
 const dbName = "serversping";
 const responsesCollName = "simplifiedResponses";
 
-export async function saveResponse(d: ISimplifiedResponse) {
+export async function saveManyResponses(resps: ISimplifiedResponse[]) {
 
     try {
+        let batchId = "";
+        if (resps.length) {
+            batchId = resps[0].batchId;
+        }
+
         await client.connect();
         const database = client.db(dbName);
         const responsesColl = database.collection(responsesCollName);
-        const result = await responsesColl.insertOne(d);
+        const result = await responsesColl.insertMany(resps);
         console.log({
             datetime: new Date().toISOString(),
-            invoked: "saveResponse",
-            insertedId: result.insertedId,
+            batchId,
+            invoked: "saveManyResponses",
             insertedCount: result.insertedCount
         });
     } finally {

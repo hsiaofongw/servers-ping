@@ -24,3 +24,9 @@ interface IWatchTarget {
     siteName: string;
     url: string;
 }
+
+interface IBatchInfo {
+    batchId: string;
+    batchInitiatedAt: number;
+    batchInitiatedAtISO: string;
+}
