@@ -1,49 +1,82 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import targets from '../../data/watchList.json';
 import got from 'got';
-import { saveTriggerLog } from '../../helpers/triggerLogsDto';
+import { saveResponse } from '../../helpers/logsDto';
+import { v4 as uuidv4 } from 'uuid';
 
 async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
 
-    const datetime = new Date();
+    const t0 = new Date();
+    const batchInitiatedAt = t0.valueOf();
+    const batchInitiatedAtISO = t0.toISOString();
+    const batchId = uuidv4();
+    const promises = [];
 
-    let triggerLog = { 
-        datetime: datetime.toISOString(),
-        since: datetime.valueOf(),
-        responses: [] as ISimplifiedResponse[]
-    };
+    for (const target of targets) {
+        const url = target.url;
+        const requestIgnitedAt = new Date().valueOf();
+        const promise = got( url, {
+            method: 'GET', headers: {
+                'User-Agent': 'servers-ping, status monitor'
+            }
+        }).then(gotResp => {
+            const requestArrivedAt = new Date().valueOf();
+            const headers = gotResp.headers;
+            const body = gotResp.body;
+            const statusCode = gotResp.statusCode;
+            const statusMessage = gotResp.statusMessage || "";
+            const roundTrip = requestArrivedAt - requestIgnitedAt;
+            const requestId = uuidv4();
 
-    let resultsPromise = targets.map(async (target) => {
-        const timeStart = new Date().valueOf();
-        const { headers, statusCode } = await got(target.url);
-        const timeReceive = new Date().valueOf();
-        const roundtrip = timeReceive - timeStart;
+            let interestedHeaders = {
+                'content-type': '',
+                'cache-control': '',
+                'date': '',
+                'etag': '',
+                'x-vercel-cache': '',
+                'age': '',
+                'server': '',
+                'transfer-encoding': '',
+                'content-encoding': ''
+            };
 
-        let response = {
-            datetime: new Date().toISOString(),
-            'siteName': target.siteName,
-            'url': target.url,
-            'statusCode': statusCode,
-            'headers': {},
-            timeStart,
-            timeReceive,
-            roundtrip
-        };
+            for (const k in headers) {
+                if (k in interestedHeaders) {
+                    interestedHeaders[k] = headers[k];
+                }
+            }
 
-        console.log(response);
-        
-        response['headers'] = headers;
+            const siteName = target.siteName;
 
-        triggerLog.responses.push(response);
-    });
+            let response = {
+                batchInitiatedAt, batchInitiatedAtISO,
+                batchId, requestId, requestIgnitedAt, requestArrivedAt,
+                roundTrip, siteName, url, statusCode, statusMessage,
+                'headers': interestedHeaders
+            } as ISimplifiedResponse;
 
-    Promise.allSettled(resultsPromise)
-    .then(async (values) => {
-        return await saveTriggerLog(triggerLog);
+            console.log(response);
+
+            return response;
+        })
+        .then(d => saveResponse(d));
+
+        promises.push(promise);
+    }
+
+    await Promise.allSettled(promises)
+    .then(d => res.status(200).json({
+        ok: true,
+        msg: 'No error(s).'
+    }))
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({
+            ok: false,
+            msg: 'Internal Error'
+        });
     })
-    .then(values => {
-        res.status(200).json(triggerLog);
-    }).finally(() => {
+    .finally(() => {
         res.end();
     });
 }

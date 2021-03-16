@@ -2,19 +2,18 @@
 /// <reference types="next/types/global" />
 
 interface ISimplifiedResponse {
+    batchInitiatedAt: number;
+    batchInitiatedAtISO: string;
+    batchId: string;
+    requestId: string;
     siteName: string;
     url: string;
     statusCode: number;
+    statusMessage: string;
     headers: ISimplifiedHeaders;
-    timeStart: number;
-    timeReceive: number;
-    roundtrip: number;
-}
-
-interface ITriggerLog {
-    datetime: string;
-    since: number;
-    responses: ISimplifiedResponse[];
+    requestIgnitedAt: number;
+    requestArrivedAt: number;
+    roundTrip: number;
 }
 
 interface ISimplifiedHeaders {

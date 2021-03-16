@@ -15,28 +15,23 @@ console.log({
 
 const client = new MongoClient(uri);
 const dbName = "serversping";
-const triggerLogsCollName = "triggerLogs";
+const responsesCollName = "simplifiedResponses";
 
-export async function saveTriggerLog(triggerLog: ITriggerLog) {
+export async function saveResponse(d: ISimplifiedResponse) {
 
     try {
         await client.connect();
         const database = client.db(dbName);
-        const triggerLogsColl = database.collection(triggerLogsCollName);
-        const result = await triggerLogsColl.insertOne(triggerLog);
+        const responsesColl = database.collection(responsesCollName);
+        const result = await responsesColl.insertOne(d);
         console.log({
             datetime: new Date().toISOString(),
-            invoked: "saveTriggerLog",
+            invoked: "saveResponse",
             insertedId: result.insertedId,
             insertedCount: result.insertedCount
         });
     } finally {
         await client.close();
     }
-
-}
-
-async function getTriggerLogs(since: number) {
-    const sinceDate = new Date(since);
 
 }
