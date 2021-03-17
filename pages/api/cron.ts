@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import targetsData from '../../data/watchList.json';
 import got from 'got';
-import { saveManyResponses } from '../../helpers/logsDto';
+import { saveManyResponses } from '../../helpers/dto';
 import { v4 as uuidv4 } from 'uuid';
 
 function attachBatchInfo(resp: ISimplifiedResponse, info: IBatchInfo) {
@@ -68,6 +68,15 @@ async function makeResponse(target: IWatchTarget) {
 }
 
 async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
+
+    const ip = (req.headers['x-real-ip'] as string) || '';
+    if (ip !== process.env?.ALLOWED_IP) {
+        res.status(403).json({
+            ok: false,
+            msg: 'Forbidden'
+        });
+        return;
+    }
 
     const t0 = new Date();
 

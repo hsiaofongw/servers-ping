@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import targetsData from '../data/watchList.json';
 
 const username = process.env?.DB_USERNAME || "usernameNotFound";
 const password = process.env?.DB_PASSWORD || "passwordNotFound";
@@ -31,6 +32,40 @@ export async function saveManyResponses(resps: ISimplifiedResponse[]) {
             invoked: "saveManyResponses",
             insertedCount: result.insertedCount
         });
+    } finally {
+        await client.close();
+    }
+
+}
+
+export async function getTargets() {
+    const targets = targetsData as IWatchTarget[];
+    return targets;
+}
+
+export async function getResponses(since: number) {
+    const query = {
+        batchInitiatedAt: {
+            "$gte": since
+        }
+    };
+
+    const options = {
+        projection: { _id: 0 },
+    };
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const responsesColl = database.collection(responsesCollName);
+        const cursor = responsesColl.find(query, options);
+
+        let results = [] as ISimplifiedResponse[];
+        await cursor.forEach(d => {
+            results.push(d as ISimplifiedResponse);
+        });
+
+        return results;
     } finally {
         await client.close();
     }

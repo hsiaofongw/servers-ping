@@ -30,3 +30,12 @@ interface IBatchInfo {
     batchInitiatedAt: number;
     batchInitiatedAtISO: string;
 }
+
+interface IHomeProps {
+    targets: IWatchTarget[];
+    responses: ISimplifiedResponse[];
+}
+
+interface IStatusProps {
+    responses: ISimplifiedResponse[];
+}
