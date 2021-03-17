@@ -2,8 +2,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import React from 'react';
-import { getTargets, getResponses } from '../helpers/dto';
 import styles from '../styles/Home.module.scss';
+import got from 'got';
 
 class Status extends React.Component<IStatusProps, {}> {
 
@@ -47,13 +47,10 @@ export default class Home extends React.Component<IHomeProps, {}> {
 }
 
 export const getServerSideProps: GetServerSideProps = async context => {
-    const targets = await getTargets();
 
-    let now = new Date().valueOf();
-    let oneDay = 24 * 60 * 60 * 1000;
-    let dayBefore = now - oneDay
-
-    const responses = await getResponses(dayBefore);
+    const apiEndPoint = "https://servers-ping.vercel.app/api";
+    const responses = await got(`${apiEndPoint}/responses`).json();
+    const targets = await got(`${apiEndPoint}/watchlist`).json();
 
     return {
         props: {

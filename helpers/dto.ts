@@ -43,7 +43,7 @@ export async function getTargets() {
     return targets;
 }
 
-export async function getResponses(since: number) {
+export async function getResponses(since: number): Promise<ISimplifiedResponse[]> {
     const query = {
         batchInitiatedAt: {
             "$gte": since
