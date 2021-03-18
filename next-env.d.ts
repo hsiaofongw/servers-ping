@@ -36,6 +36,12 @@ interface IHomeProps {
     responses: ISimplifiedResponse[];
 }
 
-interface IStatusProps {
+interface ISlots48Props {
     responses: ISimplifiedResponse[];
+}
+
+interface IRectProps {
+    width?: number;
+    height?: number;
+    color?: string;
 }
