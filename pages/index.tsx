@@ -81,9 +81,23 @@ class LogsSection extends React.Component {
 }
 
 export default class Home extends React.Component<IHomeProps, {}> {
+
     constructor(props: IHomeProps) {
         super(props);
     }
+
+    classifyByURL(responses: ISimplifiedResponse[]): IndexedISimplifiedResponses {
+        let idx = {};
+        for (const res of responses) {
+            if (!(res.url in idx)) {
+                idx[res.url] = [];
+            }
+            idx[res.url].push(res);
+        }
+
+        return idx;
+    }
+
 
     render() {
 
@@ -93,9 +107,9 @@ export default class Home extends React.Component<IHomeProps, {}> {
             <title>{title}</title>
         </Head>;
 
-        // const targetEles = this.props.targets.map(target => {
-        //     return <h2 key={target.url} >{target.siteName}</h2>
-        // });
+        const responses = this.props.responses;
+        const indexedResponses = this.classifyByURL(responses);
+        console.log(indexedResponses);
 
         return <div className="mt-8 ml-auto mr-auto max-w-3xl p-4">
             {headEle}
@@ -118,13 +132,13 @@ export default class Home extends React.Component<IHomeProps, {}> {
 
 export const getServerSideProps: GetServerSideProps = async context => {
 
-    // const apiEndPoint = "https://servers-ping.vercel.app/api";
-    // const responses = await got(`${apiEndPoint}/responses`).json();
-    // const targets = await got(`${apiEndPoint}/watchlist`).json();
+    const apiEndPoint = "https://servers-ping.vercel.app/api";
+    const responses = await got(`${apiEndPoint}/responses`).json();
+    const targets = await got(`${apiEndPoint}/watchlist`).json();
 
     return {
         props: {
-            // targets, responses
+            targets, responses
         }
     };
 }

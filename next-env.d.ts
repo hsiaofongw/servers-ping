@@ -14,6 +14,12 @@ interface ISimplifiedResponse {
     requestIgnitedAt: number;
     requestArrivedAt: number;
     roundTrip: number;
+    errorCode?: string;
+    errorMessage?: string;
+}
+
+interface IndexedISimplifiedResponses {
+    [key: string]: ISimplifiedResponse[];
 }
 
 interface ISimplifiedHeaders {

@@ -30,9 +30,34 @@ async function makeResponse(target: IWatchTarget) {
     const url = target.url;
     const siteName = target.siteName;
     const requestIgnitedAt = new Date().valueOf();
+    const requestId = uuidv4();
+
+    let template = {
+        batchInitiatedAt: 0,
+        batchInitiatedAtISO: '', 
+        batchId: '', 
+        requestId: '',
+        requestIgnitedAt: 0,
+        requestArrivedAt: 0,
+        roundTrip: 0,
+        siteName: '',
+        url: '',
+        statusCode: 0,
+        statusMessage: '',
+        headers: {},
+        errorCode: '',
+        errorMessage: ''
+    }
+
+    template.siteName = siteName;
+    template.url = url;
+    template.requestId = requestId;
+    template.requestIgnitedAt = requestIgnitedAt;
+
     return got( url, {
         method: 'GET', headers: {
-            'User-Agent': 'servers-ping, status monitor'
+            'User-Agent': 'servers-ping, status monitor',
+            'Pragma': 'no-cache'
         }
     }).then(gotResp => {
         const requestArrivedAt = new Date().valueOf();
@@ -41,29 +66,25 @@ async function makeResponse(target: IWatchTarget) {
         const statusCode = gotResp.statusCode;
         const statusMessage = gotResp.statusMessage || "";
         const roundTrip = requestArrivedAt - requestIgnitedAt;
-        const requestId = uuidv4();
-
+        
         let headers = getSimplifiedResponseTemplate();
         for (const k in upstreamHeaders) {
             headers[k] = upstreamHeaders[k];
         }
 
-        let response = {
-            batchInitiatedAt: 0, 
-            batchInitiatedAtISO: '',
-            batchId: '', 
-            requestId, 
-            requestIgnitedAt, 
-            requestArrivedAt,
-            roundTrip,
-            siteName, 
-            url, 
-            statusCode, 
-            statusMessage,
-            headers
-        } as ISimplifiedResponse;
+        template.requestArrivedAt = requestArrivedAt;
+        template.roundTrip = roundTrip;
+        template.statusCode = statusCode;
+        template.statusMessage = statusMessage;
+        template.headers = headers;
 
-        return response;
+        return template;
+    }).catch(error => {
+        console.log(error);
+
+        template.errorCode = error?.code || "";
+        template.errorMessage = error?.message || error?.msg || "";
+        return template;
     });
 }
 
