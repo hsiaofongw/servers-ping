@@ -4,6 +4,7 @@ import { GetServerSideProps } from 'next'
 import React from 'react';
 import got from 'got';
 import { Random } from '../helpers/random';
+import { ResponseCheck } from '../helpers/responseCheck';
 
 class Rect extends React.Component<IRectProps, {}> {
     render() {
@@ -20,7 +21,7 @@ class Rect extends React.Component<IRectProps, {}> {
 class RecordPreview extends React.Component<{ response: ISimplifiedResponse }, {}> {
 
     anomalyCheck(x: ISimplifiedResponse): boolean {
-        return false;
+        return ResponseCheck.anomalyDetech(x);
     }
 
     render() {
@@ -53,10 +54,15 @@ class RecordsPreview extends React.Component<IRecordsPreviewProps, {}> {
         const nPick = 30;
         const responses = Random.simpleRandomSampling<ISimplifiedResponse>(this.props.responses, nPick);
 
+        let reportWords = "No report(s).";
+        if (responses.some(r => ResponseCheck.anomalyDetech(r))) {
+            reportWords = "Anomaly(ies) exists.";
+        }
+
         return (
             <div className="mb-8">
             <h2 className="font-sans text-lg mb-4">{responses[0].siteName}</h2>
-            <h3 className="mb-4">一天之内：No report(s).</h3>
+            <h3 className="mb-4">{`一天之内：${reportWords}`}</h3>
             <div className="flex flex-nowrap max-h-16 border-2 border-gray-400 p-1 pr-0 mb-8">
                 {responses.map(r => <RecordPreview key={r.requestId} response={r} />)}
             </div>
