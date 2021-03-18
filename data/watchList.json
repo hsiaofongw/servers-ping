@@ -4,6 +4,10 @@
         "url": "https://exploro.one"
     },
     {
+        "siteName": "RSS 服务",
+        "url": "https://exploro.one/feed/atom"
+    },
+    {
         "siteName": "文章列表",
         "url": "https://blog-data-nextjs.vercel.app/api/articles"
     },
