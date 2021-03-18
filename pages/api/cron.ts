@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import targetsData from '../../data/watchList.json';
 import got from 'got';
-import { saveManyResponses } from '../../helpers/dto';
+import { getTargets, saveManyResponses } from '../../helpers/dto';
 import { v4 as uuidv4 } from 'uuid';
 
 function attachBatchInfo(resp: ISimplifiedResponse, info: IBatchInfo) {
@@ -107,7 +106,7 @@ async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
         batchInitiatedAtISO: t0.toISOString()
     };
 
-    const targets = targetsData as IWatchTarget[];
+    const targets = await getTargets();
     const promises = targets.map(async target => {
         const resp = await makeResponse(target);
         return attachBatchInfo(resp, batchInfo);

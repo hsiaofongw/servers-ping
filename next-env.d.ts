@@ -40,6 +40,7 @@ interface IBatchInfo {
 interface IHomeProps {
     targets: IWatchTarget[];
     responses: ISimplifiedResponse[];
+    dailyLogs: IDailyLog[];
 }
 
 interface ISlots48Props {
@@ -50,4 +51,20 @@ interface IRectProps {
     width?: number;
     height?: number;
     color?: string;
+}
+
+interface IRecordsPreviewProps {
+    responses: ISimplifiedResponse[];
+}
+
+interface IDailyLogProps {
+    monthName: string;
+    day: number;
+    content: string[];
+}
+
+interface IDailyLog {
+    monthName: string;
+    day: number;
+    content: string[];
 }

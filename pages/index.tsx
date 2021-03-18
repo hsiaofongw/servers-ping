@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import React from 'react';
 import got from 'got';
+import { Random } from '../helpers/random';
 
 class Rect extends React.Component<IRectProps, {}> {
     render() {
@@ -16,47 +17,60 @@ class Rect extends React.Component<IRectProps, {}> {
     }
 }
 
-class RecordsPreview extends React.Component<{}, {}> {
+class RecordPreview extends React.Component<{ response: ISimplifiedResponse }, {}> {
+
+    anomalyCheck(x: ISimplifiedResponse): boolean {
+        return false;
+    }
+
     render() {
-        return <div className="mb-8">
-        <h2 className="font-sans text-lg mb-4">探索子博客主站</h2>
-        <h3 className="mb-4">最近 24 小时：No report(s).</h3>
-        <div className="flex flex-nowrap max-h-16 border-2 border-gray-400 p-1 mb-8">
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-            <div className="border-gray-400 border-2 mr-1 hover:border-gray-200 cursor-pointer" ><Rect /></div>
-        </div>
-    </div>;
+        const anomaly = this.anomalyCheck(this.props.response);
+        if (anomaly) {
+            return (
+                <div 
+                    className="mr-1" 
+                >
+                    <Rect color={"#d33682"} />
+                </div>
+            );
+        }
+        else {
+            return (
+                <div 
+                    className="mr-1" 
+                >
+                    <Rect color={"#2aa198"} />
+                </div>
+            );
+        }
     }
 }
 
-class DailyLog extends React.Component {
+class RecordsPreview extends React.Component<IRecordsPreviewProps, {}> {
+
+    render() {
+
+        const nPick = 30;
+        const responses = Random.simpleRandomSampling<ISimplifiedResponse>(this.props.responses, nPick);
+
+        return (
+            <div className="mb-8">
+            <h2 className="font-sans text-lg mb-4">{responses[0].siteName}</h2>
+            <h3 className="mb-4">一天之内：No report(s).</h3>
+            <div className="flex flex-nowrap max-h-16 border-2 border-gray-400 p-1 pr-0 mb-8">
+                {responses.map(r => <RecordPreview key={r.requestId} response={r} />)}
+            </div>
+            </div>
+        );
+    }
+}
+
+class DailyLog extends React.Component<IDailyLogProps, {}> {
     render() {
         return <div className="mb-8">
-            <h3 className="text-lg mb-4">May 18:</h3>
+            <h3 className="text-lg mb-4">{`${this.props.monthName} ${this.props.day}:`}</h3>
             <div>
-                <p className="mb-4">No report(s).</p>
+                {this.props.content.map(p => <p key={p} className="mb-4">{p}</p>)}
             </div>
         </div>;
     }
@@ -109,22 +123,24 @@ export default class Home extends React.Component<IHomeProps, {}> {
 
         const responses = this.props.responses;
         const indexedResponses = this.classifyByURL(responses);
-        console.log(indexedResponses);
+
+        let recordsPreviews = [];
+        for (const k in indexedResponses) {
+            recordsPreviews.push(
+                <RecordsPreview key={k} responses={indexedResponses[k]} />
+            );
+        }
 
         return <div className="mt-8 ml-auto mr-auto max-w-3xl p-4">
             {headEle}
-            <h1 className="font-sans text-3xl mb-8">所有子系统状态正常</h1>
+            <h1 className="font-sans text-3xl mb-8">{title}</h1>
             <hr className="mb-8"/>
             <RecordsSection>
-                <RecordsPreview />
-                <RecordsPreview />
-                <RecordsPreview />
+                {recordsPreviews}
             </RecordsSection>
             <hr className="mb-8" />
             <LogsSection>
-                <DailyLog />
-                <DailyLog />
-                <DailyLog />
+                {this.props.dailyLogs.map(l => <DailyLog {...l} />)}
             </LogsSection>
         </div>
     }
@@ -135,10 +151,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
     const apiEndPoint = "https://servers-ping.vercel.app/api";
     const responses = await got(`${apiEndPoint}/responses`).json();
     const targets = await got(`${apiEndPoint}/watchlist`).json();
+    const dailyLogs = await got(`${apiEndPoint}/dailylogs`).json();
 
     return {
         props: {
-            targets, responses
+            targets, responses, dailyLogs
         }
     };
 }

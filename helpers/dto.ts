@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import targetsData from '../data/watchList.json';
+import dailyLogs from '../data/handWrittenLogs.json';
 
 const username = process.env?.DB_USERNAME || "usernameNotFound";
 const password = process.env?.DB_PASSWORD || "passwordNotFound";
@@ -70,4 +71,8 @@ export async function getResponses(since: number): Promise<ISimplifiedResponse[]
         await client.close();
     }
 
+}
+
+export async function getDailyLogs(): Promise<IDailyLog[]> {
+    return dailyLogs;
 }
