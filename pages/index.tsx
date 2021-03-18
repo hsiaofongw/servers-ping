@@ -51,6 +51,35 @@ class RecordsPreview extends React.Component<{}, {}> {
     }
 }
 
+class DailyLog extends React.Component {
+    render() {
+        return <div className="mb-8">
+            <h3 className="text-lg mb-4">May 18:</h3>
+            <div>
+                <p className="mb-4">No report(s).</p>
+            </div>
+        </div>;
+    }
+}
+
+class RecordsSection extends React.Component {
+    render() {
+        return <div className="mb-8">
+            <h2 className="text-2xl mb-8">监测记录概要</h2>
+            {this.props.children}
+        </div>;
+    }
+}
+
+class LogsSection extends React.Component {
+    render() {
+        return <div className="mb-8">
+            <h2 className="text-2xl mb-8">日志记录</h2>
+            {this.props.children}
+        </div>;
+    }
+}
+
 export default class Home extends React.Component<IHomeProps, {}> {
     constructor(props: IHomeProps) {
         super(props);
@@ -72,27 +101,17 @@ export default class Home extends React.Component<IHomeProps, {}> {
             {headEle}
             <h1 className="font-sans text-3xl mb-8">所有子系统状态正常</h1>
             <hr className="mb-8"/>
-            <div className="mb-8">
-                <h2 className="text-2xl mb-8">监测记录概要</h2>
+            <RecordsSection>
                 <RecordsPreview />
                 <RecordsPreview />
-            </div>
+                <RecordsPreview />
+            </RecordsSection>
             <hr className="mb-8" />
-            <div className="mb-8">
-                <h2 className="text-2xl mb-8">日志记录</h2>
-                <div className="mb-8">
-                    <h3 className="text-lg mb-4">May 18:</h3>
-                    <p>No report(s).</p>
-                </div>
-                <div className="mb-8">
-                    <h3 className="text-lg mb-4">May 17:</h3>
-                    <p>No report(s).</p>
-                </div>
-                <div className="mb-8">
-                    <h3 className="text-lg mb-4">May 16:</h3>
-                    <p>No report(s).</p>
-                </div>
-            </div>
+            <LogsSection>
+                <DailyLog />
+                <DailyLog />
+                <DailyLog />
+            </LogsSection>
         </div>
     }
 }
