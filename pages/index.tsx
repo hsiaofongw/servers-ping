@@ -18,7 +18,7 @@ class Rect extends React.Component<IRectProps, {}> {
     }
 }
 
-class RecordPreview extends React.Component<{ response: ISimplifiedResponse }, {}> {
+class RecordPreview extends React.Component<{ response: ISimplifiedResponse, onMouseOver: () => void, onMouseLeave: () => void }, {}> {
 
     anomalyCheck(x: ISimplifiedResponse): boolean {
         return ResponseCheck.anomalyDetech(x);
@@ -26,45 +26,91 @@ class RecordPreview extends React.Component<{ response: ISimplifiedResponse }, {
 
     render() {
         const anomaly = this.anomalyCheck(this.props.response);
+        let rect = <Rect color={"#2aa198"} />;
+
         if (anomaly) {
-            return (
-                <div 
-                    className="mr-1" 
-                >
-                    <Rect color={"#d33682"} />
-                </div>
-            );
-        }
-        else {
-            return (
-                <div 
-                    className="mr-1" 
-                >
-                    <Rect color={"#2aa198"} />
-                </div>
-            );
-        }
-    }
-}
-
-class RecordsPreview extends React.Component<IRecordsPreviewProps, {}> {
-
-    render() {
-
-        const nPick = 30;
-        const responses = Random.simpleRandomSampling<ISimplifiedResponse>(this.props.responses, nPick);
-
-        let reportWords = "No report(s).";
-        if (responses.some(r => ResponseCheck.anomalyDetech(r))) {
-            reportWords = "Anomaly(ies) exists.";
+            rect =  <Rect color={"#d33682"} />;
         }
 
         return (
+            <div 
+                className="mr-1" 
+                onMouseOver={e => this.props.onMouseOver()}
+                onMouseLeave={e => this.props.onMouseLeave()}
+            >
+                {rect}
+            </div>
+        );
+    }
+}
+
+class RecordsPreview extends React.Component<
+    IRecordsPreviewProps, 
+    { 
+        responses: ISimplifiedResponse[], 
+        reportWords: string, 
+        summaryWords: string 
+    }
+> {
+    constructor(props: IRecordsPreviewProps) {
+        super(props);
+
+        const nPick = 30;
+        let responses = Random.simpleRandomSampling<ISimplifiedResponse>(this.props.responses, nPick);
+        let summaryWords = "一天之内：No report(s).";
+        if (responses.some(r => ResponseCheck.anomalyDetech(r))) {
+            summaryWords = "一天之内：Anomaly(ies) exists.";
+        }
+
+        responses = responses.sort((a, b) => a.requestIgnitedAt - b.requestIgnitedAt);
+
+        this.state = {
+            reportWords: "",
+            summaryWords,
+            responses
+        };
+    }
+
+    onMouseOver(r: ISimplifiedResponse) {
+        const time = new Date(r.requestIgnitedAt).toLocaleTimeString();
+
+        let reportWords = "";
+        
+        if (r.errorCode || r.errorMessage) {
+            reportWords = `时间：${time} 错误码：${r.errorCode || ""} 错误信息：${r.errorMessage}`;
+        }
+        else {
+            reportWords = `时间：${time} 状态码：${r.statusCode} 消息：${r.statusMessage} 延迟：${r.roundTrip}`;
+        }
+
+        this.setState({
+            reportWords
+        });
+    }
+
+    onMouseLeave() {
+        this.setState({
+            reportWords: ""
+        });
+    }
+
+    render() {
+
+        return (
             <div className="mb-8">
-            <h2 className="font-sans text-lg mb-4">{responses[0].siteName}</h2>
-            <h3 className="mb-4">{`一天之内：${reportWords}`}</h3>
+            <h2 className="font-sans text-lg mb-4">{this.state.responses[0].siteName}</h2>
+            <h3 className="mb-4">{this.state.reportWords || this.state.summaryWords}</h3>
             <div className="flex flex-nowrap max-h-16 border-2 border-gray-400 p-1 pr-0 mb-8">
-                {responses.map(r => <RecordPreview key={r.requestId} response={r} />)}
+                {
+                    this.state.responses.map(r => (
+                        <RecordPreview 
+                            key={r.requestId} 
+                            onMouseOver={() => this.onMouseOver(r)} 
+                            onMouseLeave={() => this.onMouseLeave()}
+                            response={r} 
+                        />
+                    ))
+                }
             </div>
             </div>
         );
@@ -146,7 +192,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
             </RecordsSection>
             <hr className="mb-8" />
             <LogsSection>
-                {this.props.dailyLogs.map(l => <DailyLog {...l} />)}
+                {this.props.dailyLogs.map(l => <DailyLog key={l.content[0]} {...l} />)}
             </LogsSection>
         </div>
     }
