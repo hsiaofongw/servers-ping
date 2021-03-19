@@ -14,6 +14,7 @@ uri = uri.replace("<cluster-url>", cluster);
 const client = new MongoClient(uri);
 const dbName = "serversping";
 const responsesCollName = "simplifiedResponses";
+const generalChecksCollName = "generalChecks";
 
 export async function saveManyResponses(resps: ISimplifiedResponse[]) {
 
@@ -31,6 +32,25 @@ export async function saveManyResponses(resps: ISimplifiedResponse[]) {
             datetime: new Date().toISOString(),
             batchId,
             invoked: "saveManyResponses",
+            insertedCount: result.insertedCount
+        });
+    } finally {
+        await client.close();
+    }
+
+}
+
+
+export async function saveGeneralCheck(check: IGeneralCheck) {
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const generalChecksColl = database.collection(generalChecksCollName);
+        const result = await generalChecksColl.insertOne(check)
+        console.log({
+            datetime: new Date().toISOString(),
+            invoked: "saveGeneralCheck",
             insertedCount: result.insertedCount
         });
     } finally {

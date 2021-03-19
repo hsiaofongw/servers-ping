@@ -119,6 +119,10 @@ async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
             if (settle.status === 'fulfilled') {
                 values.push(settle.value);
             }
+
+            if (settle.status === 'rejected') {
+                values.push(settle.reason);
+            }
         }
 
         return values;

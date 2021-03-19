@@ -68,3 +68,15 @@ interface IDailyLog {
     day: number;
     content: string[];
 }
+
+interface IGeneralCheckResult {
+    positive: boolean;
+}
+
+interface IGeneralCheck {
+    initiatedAt: number;
+    checkAllResponsesSince: number;
+    numberOfResponsesChecked: number;
+    rangeLength: number;
+    result: IGeneralCheckResult;
+}
