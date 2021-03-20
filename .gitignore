@@ -39,3 +39,6 @@ yarn-error.log*
 # test
 test.sh
 test.js
+initiateGeneralCheck.js
+trigger-my-servers-ping.sh
+shouldSendEmail.js
