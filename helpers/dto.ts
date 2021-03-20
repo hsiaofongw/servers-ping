@@ -101,3 +101,22 @@ export async function getResponses(since: number): Promise<ISimplifiedResponse[]
 export async function getDailyLogs(): Promise<IDailyLog[]> {
     return dailyLogs;
 }
+
+export async function getLastGeneralCheck(): Promise<IGeneralCheck> {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const generalChecksColl = database.collection(generalChecksCollName);
+        const options = {
+            projection: { _id: 0 },
+            sort: { initiatedAt: -1 }
+        };
+        const result = await generalChecksColl.findOne({}, options) as IGeneralCheck;
+        return result;
+    } finally {
+        await client.close();
+    }
+
+}
