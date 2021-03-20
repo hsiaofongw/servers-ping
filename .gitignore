@@ -38,3 +38,4 @@ yarn-error.log*
 
 # test
 test.sh
+test.js

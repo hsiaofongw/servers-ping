@@ -38,10 +38,8 @@ async function requestHandler(req: NextApiRequest, res: NextApiResponse) {
             }
         };
 
-        res.status(200).json(logObject);
-
         await saveGeneralCheck(logObject);
-
+        res.status(200).json(logObject);
     }
     else {
         res.status(400).json({

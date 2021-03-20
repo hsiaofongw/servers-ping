@@ -11,19 +11,20 @@ uri = uri.replace("<username>", username);
 uri = uri.replace("<password>", password);
 uri = uri.replace("<cluster-url>", cluster);
 
-const client = new MongoClient(uri);
 const dbName = "serversping";
 const responsesCollName = "simplifiedResponses";
 const generalChecksCollName = "generalChecks";
 
 export async function saveManyResponses(resps: ISimplifiedResponse[]) {
 
+    const client = new MongoClient(uri);
+
     try {
         let batchId = "";
         if (resps.length) {
             batchId = resps[0].batchId;
         }
-
+        
         await client.connect();
         const database = client.db(dbName);
         const responsesColl = database.collection(responsesCollName);
@@ -42,6 +43,8 @@ export async function saveManyResponses(resps: ISimplifiedResponse[]) {
 
 
 export async function saveGeneralCheck(check: IGeneralCheck) {
+
+    const client = new MongoClient(uri);
 
     try {
         await client.connect();
@@ -65,6 +68,8 @@ export async function getTargets() {
 }
 
 export async function getResponses(since: number): Promise<ISimplifiedResponse[]> {
+    const client = new MongoClient(uri);
+
     const query = {
         batchInitiatedAt: {
             "$gte": since
