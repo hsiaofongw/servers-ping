@@ -146,6 +146,51 @@ class LogsSection extends React.Component {
     }
 }
 
+class GeneralCheck extends React.Component<{}, { positive: boolean }> {
+
+    constructor(props: {}) {
+        super(props);
+        
+        this.state = {
+            positive: false
+        }
+
+    }
+
+    componentDidMount() {
+        this.updateCheckResult();
+    }
+
+    async updateCheckResult() {
+        const generalCheckEndPoint = "https://servers-ping.vercel.app/api/lastcheck";
+        await window.fetch(generalCheckEndPoint)
+        .then(d => d.json())
+        .then(d => {
+            const { result: { positive } }  = d;
+            this.setState({ positive });
+        })
+        .catch(e => console.log(e));
+    }
+
+    render() {
+        let title = "所有子系统状态正常";
+
+        if (this.state.positive) {
+            title = "需要系统管理员介入";
+        }
+
+        const headEle = <Head>
+            <title>{title}</title>
+        </Head>;
+
+        return <div>
+            {headEle}
+            <h1 className="font-sans text-3xl mb-8">{title}</h1>
+        </div>;
+    }
+    
+}
+
 export default class Home extends React.Component<IHomeProps, {}> {
 
     constructor(props: IHomeProps) {
@@ -166,13 +211,6 @@ export default class Home extends React.Component<IHomeProps, {}> {
 
 
     render() {
-
-        const title = "所有子系统状态正常";
-
-        const headEle = <Head>
-            <title>{title}</title>
-        </Head>;
-
         const responses = this.props.responses;
         const indexedResponses = this.classifyByURL(responses);
 
@@ -184,8 +222,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
         }
 
         return <div className="mt-8 ml-auto mr-auto max-w-3xl p-4">
-            {headEle}
-            <h1 className="font-sans text-3xl mb-8">{title}</h1>
+            <GeneralCheck />
             <hr className="mb-8"/>
             <RecordsSection>
                 {recordsPreviews}
