@@ -34,5 +34,13 @@
     {
         "siteName": "URL 重写服务",
         "url": "https://exploro.one/posts/writing-in-markdown"
+    },
+    {
+        "siteName": "博客评论区页面",
+        "url": "https://exploro.one/comments"
+    },
+    {
+        "siteName": "评论 API",
+        "url": "https://blog-comments.exploro.one/comments"
     }
 ]
